@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Posts</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h2>Posts</h2>
+      <button onclick="addPost()" class="btn btn-primary">Agregar Post</button>
+      <button onclick="updatePost()" class="btn btn-warning">Actualizar Post</button>
+      <table class="table" id="postsTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Body</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Los posts se cargarán aquí -->
+        </tbody>
+      </table>
+    
+    </div>
+    <script>
+      // Función para cargar los posts
+      function loadPosts() {
+        fetch("http://localhost:3000/posts")
+          .then((response) => response.json())
+          .then((posts) => {
+            const tableBody = document
+              .getElementById("postsTable")
+              .getElementsByTagName("tbody")[0];
+            tableBody.innerHTML = ""; // Limpiar el contenido anterior
+
+            posts.forEach((post) => {
+              let row = tableBody.insertRow();
+              let idCell = row.insertCell(0);
+              let titleCell = row.insertCell(1);
+              let bodyCell = row.insertCell(2);
+              idCell.textContent = post.id;
+              titleCell.textContent = post.title;
+              bodyCell.textContent = post.body;
+            });
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // Llamar a la función al cargar la página
+      document.addEventListener("DOMContentLoaded", loadPosts);
+
+      // Función para agregar un post
+      function addPost() {
+        fetch("http://localhost:3000/posts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: "Nuevo Post",
+            body: "Contenido del nuevo post",
+          }),
+        })
+          .then(() => loadPosts()) // Recargar los posts después de agregar uno nuevo
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // Función para actualizar un post
+      function updatePost() {
+        // Obtener el ID del primer post de la tabla (solo como ejemplo)
+        const postId = document.getElementById("postsTable").rows[1].cells[0]
+          .textContent;
+
+        fetch(`http://localhost:3000/posts/${postId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: "Post Actualizado",
+            body: "Contenido del post actualizado",
+          }),
+        })
+          .then(() => loadPosts()) // Recargar los posts después de actualizar uno
+          .catch((error) => console.error("Error:", error));
+      }
+    </script>
+  </body>
+</html>
